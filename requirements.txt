@@ -1,0 +1,5 @@
+Twisted
+requests
+tinydb
+pyipv8
+treq 
