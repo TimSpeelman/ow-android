@@ -8,9 +8,9 @@ import argparse
 from asyncio import all_tasks, ensure_future, gather, get_event_loop, sleep
 from base64 import b64encode
 
-from pyipv8.ipv8_service import IPv8 # FIXME
-from pyipv8.ipv8.configuration import get_default_configuration
-from pyipv8.ipv8.REST.rest_manager import RESTManager
+from ipv8_service import IPv8 # FIXME
+from ipv8.configuration import get_default_configuration
+from ipv8.REST.rest_manager import RESTManager
 from ow_android.hello_endpoint import HelloEndpoint
 
 # Launch OpenWalletService.
