@@ -3,12 +3,14 @@ import os
 import shutil
 import signal
 import sys
+import argparse
 
 from asyncio import all_tasks, ensure_future, gather, get_event_loop, sleep
 from base64 import b64encode
-from pyipv8.ipv8_service import IPv8
-from pyipv8.ipv8.configuration import get_default_configuration
-from pyipv8.ipv8.REST.rest_manager import RESTManager
+
+from ipv8_service import IPv8
+from ipv8.configuration import get_default_configuration
+from ipv8.REST.rest_manager import RESTManager
 
 # Launch OpenWalletService.
 # - Defaults to port 13310
@@ -21,7 +23,7 @@ class OpenWalletService(object):
     def __init__(self):
         self._stopping = False
 
-    async def start(self):
+    async def start(self, args):
 
         port = self.default_port
         workdir = self.workdir
@@ -74,9 +76,10 @@ class OpenWalletService(object):
         url = "http://localhost:%d" % port
         mid_b64 = b64encode(ipv8.keys["anonymous id"].mid).decode('utf-8')
 
-        print("Running at %s" % url)
-        print("- workdir: %s" % workdir)
-        print("- mid_b64: %s" % mid_b64)
+        print("Starting OpenWalletService at %s" % url)
+        print("OpenWalletService me: %s/me" % url)
+        print("OpenWalletService workdir: %s" % workdir)
+        print("OpenWalletService mid_b64: %s" % mid_b64)
 
         data = {
             'port': port,
@@ -109,11 +112,17 @@ class OpenWalletService(object):
         signal.signal(signal.SIGTERM, lambda sig, _: ensure_future(signal_handler(sig)))
 
 
-def main():
+def main(argv):
+    parser = argparse.ArgumentParser(add_help=False, description=('Starts OpenWallet as a service'))
+    parser.add_argument('--help', '-h', action='help', default=argparse.SUPPRESS, help='Show this help message and exit')
+    # parser.add_argument('--no-rest-api', '-a', action='store_const', default=False, const=True, help='Autonomous: disable the REST api')
+    # parser.add_argument('--statistics', '-s', action='store_const', default=False, const=True, help='Enable IPv8 overlay statistics')
+
     service = OpenWalletService()
 
+    args = parser.parse_args(sys.argv[1:])
     loop = get_event_loop()
-    coro = service.start()
+    coro = service.start(args)
     ensure_future(coro)
 
     if sys.platform == 'win32':
@@ -127,4 +136,4 @@ def main():
     loop.run_forever()
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
