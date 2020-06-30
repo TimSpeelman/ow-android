@@ -8,9 +8,10 @@ import argparse
 from asyncio import all_tasks, ensure_future, gather, get_event_loop, sleep
 from base64 import b64encode
 
-from ipv8_service import IPv8
-from ipv8.configuration import get_default_configuration
-from ipv8.REST.rest_manager import RESTManager
+from pyipv8.ipv8_service import IPv8 # FIXME
+from pyipv8.ipv8.configuration import get_default_configuration
+from pyipv8.ipv8.REST.rest_manager import RESTManager
+from ow_android.hello_endpoint import HelloEndpoint
 
 # Launch OpenWalletService.
 # - Defaults to port 13310
@@ -78,6 +79,7 @@ class OpenWalletService(object):
 
         print("Starting OpenWalletService at %s" % url)
         print("OpenWalletService me: %s/me" % url)
+        print("OpenWalletService app: %s/app" % url)
         print("OpenWalletService workdir: %s" % workdir)
         print("OpenWalletService mid_b64: %s" % mid_b64)
 
@@ -92,7 +94,7 @@ class OpenWalletService(object):
 
         # Start its API
         api = RESTManager(ipv8)
-        await api.start(port)
+        await api.start(port, {'/app':HelloEndpoint})
 
          # Handle shut down
         async def signal_handler(sig):
