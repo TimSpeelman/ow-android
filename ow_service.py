@@ -94,7 +94,7 @@ class OpenWalletService(object):
 
         # Start its API
         api = RESTManager(ipv8)
-        await api.start(port, {'/app':HelloEndpoint})
+        await api.start(port=port, endpoints={'/app':HelloEndpoint})
 
          # Handle shut down
         async def signal_handler(sig):
