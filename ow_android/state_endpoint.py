@@ -7,8 +7,10 @@ import os
 try:
     from android.storage import app_storage_path
     storage_path = app_storage_path()    
+    print("Using android storage " + storage_path)
 except:
     storage_path = os.path.join(os.getcwd(), 'temp')
+    print("Using non-android storage " + storage_path)
 
 class StateEndpoint(BaseEndpoint):
     """
