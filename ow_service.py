@@ -11,14 +11,14 @@ from base64 import b64encode
 from ipv8_service import IPv8 # FIXME
 from ipv8.configuration import get_default_configuration
 from ipv8.REST.rest_manager import RESTManager
-from ow_android.hello_endpoint import HelloEndpoint
+from ow_android.gui_endpoint import GUIEndpoint
+from ow_android.state_endpoint import StateEndpoint
 
 # Launch OpenWalletService.
-# - Defaults to port 13310
 
 class OpenWalletService(object):
 
-    default_port = 13310
+    default_port = 8642
     workdir = "temp"
 
     def __init__(self):
@@ -40,7 +40,7 @@ class OpenWalletService(object):
 
         # Set up its IPv8 Configuration
         configuration = get_default_configuration()
-        configuration['logger']['level'] = "ERROR"
+        configuration['logger']['level'] = "DEBUG"
         configuration['keys'] = [
             {
                 'alias': "anonymous id", 
@@ -94,7 +94,11 @@ class OpenWalletService(object):
 
         # Start its API
         api = RESTManager(ipv8)
-        await api.start(port=port, endpoints={'/app':HelloEndpoint})
+        endpoints = {
+                '/app': GUIEndpoint,
+                '/state': StateEndpoint
+            }
+        await api.start(port=port, endpoints=endpoints)
 
          # Handle shut down
         async def signal_handler(sig):

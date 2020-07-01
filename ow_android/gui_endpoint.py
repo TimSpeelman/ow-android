@@ -3,13 +3,13 @@ from aiohttp import web
 from base64 import b64encode
 import os
 
-class HelloEndpoint(BaseEndpoint):
+class GUIEndpoint(BaseEndpoint):
     """
-    This endpoint is responsible for handing all requests regarding attestation.
+    This endpoint is responsible for serving the GUI.
     """
 
     def __init__(self):
-        super(HelloEndpoint, self).__init__()
+        super(GUIEndpoint, self).__init__()
 
     def setup_routes(self):
         path_to_root = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
@@ -18,7 +18,4 @@ class HelloEndpoint(BaseEndpoint):
         self.app.add_routes([web.static('/', path_to_static, show_index=True)])
 
     def initialize(self, session):
-        super(HelloEndpoint, self).initialize(session)
-
-    # async def handle_get(self, request):
-    #     return Response({"hello": "world"})
+        super(GUIEndpoint, self).initialize(session)
