@@ -4,14 +4,10 @@ from base64 import b64encode
 import json
 import os
 
-import importlib
-android_spec = importlib.util.find_spec("android")
-found_android = android_spec is not None
-
-if found_android:
+try:
     from android.storage import app_storage_path
     storage_path = app_storage_path()    
-else:
+except:
     storage_path = os.path.join(os.getcwd(), 'temp')
 
 class StateEndpoint(BaseEndpoint):
