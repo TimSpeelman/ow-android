@@ -14,6 +14,16 @@ from ipv8.REST.rest_manager import RESTManager
 from ow_android.gui_endpoint import GUIEndpoint
 from ow_android.state_endpoint import StateEndpoint
 
+try:
+    from android.storage import app_storage_path    
+    # On android, default to the app storage
+    default_storage_path = app_storage_path()    
+    print("Default android storage " + default_storage_path)  
+except:
+    # On non-android, default to current working directory
+    default_storage_path = os.getcwd()
+    print("Default non-android storage " + default_storage_path)
+
 # Launch OpenWalletService.
 
 class OpenWalletService(object):
@@ -24,7 +34,8 @@ class OpenWalletService(object):
     async def start(self, args):
 
         port = args.port
-        workdir = args.workdir
+        # if `args.workdir` is absolute, it will ignore `default_storage_path`
+        workdir = os.path.join(default_storage_path, args.workdir) 
         fresh = args.fresh
         loglevel = args.loglevel
 
@@ -120,10 +131,10 @@ def main(argv):
     parser = argparse.ArgumentParser(add_help=False, description=('Starts OpenWallet as a service'))
     parser.add_argument('--help', '-h', action='help', default=argparse.SUPPRESS, help='Show this help message and exit')
     parser.add_argument('--port', '-p', action='store', type=int, default=8642, help='Port number')
-    parser.add_argument('--workdir', '-w', action='store', default='./temp', help='The working directory')
+    parser.add_argument('--workdir', '-w', action='store', default='temp', help='The working directory')
     parser.add_argument('--fresh', '-f', action='store_true', help='Refresh the identity')
     parser.add_argument('--loglevel', '-l', action='store', default='ERROR', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='The log level')
-    # parser.add_argument('--statistics', '-s', action='store_const', default=False, const=True, help='Enable IPv8 overlay statistics')
+
     args = parser.parse_args(sys.argv[1:])
 
     service = OpenWalletService()
