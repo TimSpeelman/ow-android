@@ -8,8 +8,8 @@ from ipv8_service import IPv8
 
 @vp_compile
 class MyMessage(VariablePayload):
-   format_list = ['I'] # When reading data, we unpack an unsigned integer from it.
-   names = ["clock"] # We will name this unsigned integer "clock"
+   format_list = ['varlenI'] # When reading data, we unpack an unsigned integer from it.
+   names = ["message"] 
 
 class MsgCommunity(Community):
 
@@ -22,30 +22,19 @@ class MsgCommunity(Community):
        super(MsgCommunity, self).__init__(my_peer, endpoint, network)
        # Register the message handler for messages with the identifier "1".
        self.add_message_handler(1, self.on_message)
-       # The Lamport clock this peer maintains.
-       # This is for the example of global clock synchronization.
-       self.lamport_clock = 0
 
    def started(self):
        async def start_communication():
-           if not self.lamport_clock:
-               # If we have not started counting, try boostrapping
-               # communication with our other known peers.
-               for p in self.get_peers():
-                   self.send_message(p.address)
-           else:
-               self.cancel_pending_task("start_communication")
+            for p in self.get_peers():
+                self.send_message(p.address)
        self.register_task("start_communication", start_communication, interval=5.0, delay=0)
 
    def send_message(self, address):
        # Send a message with our digital signature on it.
        # We use the latest version of our Lamport clock.
-       self.endpoint.send(address, self.ezr_pack(1, MyMessage(self.lamport_clock)))
+       print("Sending message")
+       self.endpoint.send(address, self.ezr_pack(1, MyMessage("Hello World".encode('utf-8'))))
 
    @lazy_wrapper(MyMessage)
    def on_message(self, peer, payload):
-       # Update our Lamport clock.
-       self.lamport_clock = max(self.lamport_clock, payload.clock) + 1
-       print(self.my_peer, "current clock:", self.lamport_clock)
-       # Then synchronize with the rest of the network again.
-       self.send_message(peer.address)
+       print(self.my_peer, "says", payload.message)
