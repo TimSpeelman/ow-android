@@ -14,6 +14,7 @@ from ipv8.REST.rest_manager import RESTManager
 from ow_android.gui_endpoint import GUIEndpoint
 from ow_android.state_endpoint import StateEndpoint
 from ow_android.msg_overlay import MsgCommunity
+from ow_android.msg_endpoint import MsgEndpoint
 from ipv8.keyvault.crypto import ECCrypto
 
 try:
@@ -125,7 +126,8 @@ class OpenWalletService(object):
         api = RESTManager(ipv8)
         endpoints = {
                 '/app': GUIEndpoint(),
-                '/state': StateEndpoint(workdir)
+                '/state': StateEndpoint(workdir),
+                '/msg': MsgEndpoint(),
             }
 
         await api.start(port=port, endpoints=endpoints)

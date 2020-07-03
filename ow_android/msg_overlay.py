@@ -5,6 +5,7 @@ from ipv8.lazy_community import lazy_wrapper
 from ipv8.messaging.lazy_payload import VariablePayload, vp_compile
 from ipv8.peer import Peer
 from ipv8_service import IPv8
+from base64 import b64encode
 
 @vp_compile
 class MyMessage(VariablePayload):
@@ -24,16 +25,25 @@ class MsgCommunity(Community):
        self.add_message_handler(1, self.on_message)
 
    def started(self):
-       async def start_communication():
-            for p in self.get_peers():
-                self.send_message(p.address)
-       self.register_task("start_communication", start_communication, interval=5.0, delay=0)
+       print("Started")
+    #    async def start_communication():
+    #         for p in self.get_peers():
 
-   def send_message(self, address):
+    #             self.send_message(p.address, "yoyo")
+    #    self.register_task("start_communication", start_communication, interval=5.0, delay=0)
+
+   def send_message(self, mid, message):
        # Send a message with our digital signature on it.
        # We use the latest version of our Lamport clock.
-       print("Sending message")
-       self.endpoint.send(address, self.ezr_pack(1, MyMessage("Hello World".encode('utf-8'))))
+       for p in self.get_peers():
+           m = b64encode(p.mid).decode("utf-8")
+           if m == mid:
+               self.endpoint.send(p.address, self.ezr_pack(1, MyMessage(message.encode('utf-8'))))
+               print("Sending message '%s' to %s" % (message, mid))
+               return
+           else:
+               print("Skipping mid " + m)
+       print("Peer %s not found, cannot send message '%s'" % (mid, message))
 
    @lazy_wrapper(MyMessage)
    def on_message(self, peer, payload):
