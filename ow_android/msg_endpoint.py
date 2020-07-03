@@ -17,16 +17,24 @@ class MsgEndpoint(BaseEndpoint):
         super(MsgEndpoint, self).__init__()
 
     def setup_routes(self):
-        self.app.add_routes([web.get('', self.handle_get)])    
+        self.app.add_routes([
+                web.get('/peers', self.handle_get_peers),
+                web.get('/send', self.handle_send_message)
+                ])    
 
     def initialize(self, session):
         super(MsgEndpoint, self).initialize(session)
         self.msg_overlay = session.get_overlay(MsgCommunity)
 
-    def handle_get(self, request):
+    def handle_send_message(self, request):
         msg = request.query['message']
         peer = request.query['mid']
         
         self.msg_overlay.send_message(peer, msg)
         
         return Response({ "success": True })
+
+    def handle_get_peers(self, request):
+        peers = self.session.network.get_peers_for_service(self.msg_overlay.master_peer.mid)
+        return Response([b64encode(p.mid).decode('utf-8') for p in peers])
+
