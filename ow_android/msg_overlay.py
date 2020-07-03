@@ -6,6 +6,7 @@ from ipv8.messaging.lazy_payload import VariablePayload, vp_compile
 from ipv8.peer import Peer
 from ipv8_service import IPv8
 from base64 import b64encode
+import time
 
 @vp_compile
 class MyMessage(VariablePayload):
@@ -18,6 +19,8 @@ class MsgCommunity(Community):
                                 "2e4a382b5fac38e356a225339e8ff5336c70fd426d173796090416be826bcc5730533a0000e5c6db19"
                                 "107f6930d3c3a1017fe131fa396840e4facd620add83dadbd4d79185d4eabdf843efc292d7f898af46"
                                 "297c76736c"))
+
+   inbox = []
 
    def __init__(self, my_peer, endpoint, network):
        super(MsgCommunity, self).__init__(my_peer, endpoint, network)
@@ -40,11 +43,14 @@ class MsgCommunity(Community):
            if m == mid:
                self.endpoint.send(p.address, self.ezr_pack(1, MyMessage(message.encode('utf-8'))))
                print("Sending message '%s' to %s" % (message, mid))
-               return
+               return True
            else:
                print("Skipping mid " + m)
        print("Peer %s not found, cannot send message '%s'" % (mid, message))
+       return False
 
    @lazy_wrapper(MyMessage)
    def on_message(self, peer, payload):
-       print(self.my_peer, "says", payload.message)
+      print("Got message from peer")
+      t = time.time()
+      self.inbox.append((peer, payload.message, t))

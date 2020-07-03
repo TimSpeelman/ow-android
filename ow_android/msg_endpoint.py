@@ -5,7 +5,6 @@ import json
 import os
 from .msg_overlay import MsgCommunity
 
-
 class MsgEndpoint(BaseEndpoint):
     """
     This endpoint is responsible for sending custom messages to peers.
@@ -18,6 +17,7 @@ class MsgEndpoint(BaseEndpoint):
 
     def setup_routes(self):
         self.app.add_routes([
+                web.get('/inbox', self.handle_get_inbox),
                 web.get('/peers', self.handle_get_peers),
                 web.get('/send', self.handle_send_message)
                 ])    
@@ -30,9 +30,16 @@ class MsgEndpoint(BaseEndpoint):
         msg = request.query['message']
         peer = request.query['mid']
         
-        self.msg_overlay.send_message(peer, msg)
+        success = self.msg_overlay.send_message(peer, msg)
         
-        return Response({ "success": True })
+        return Response({ "success": success })
+
+    def handle_get_inbox(self, request):
+        return Response([{
+            'sender_mid_b64': b64encode(p.mid).decode('utf-8'), 
+            'message': m.decode('utf-8'),
+            'received_at': t,
+            } for (p, m, t) in self.msg_overlay.inbox])
 
     def handle_get_peers(self, request):
         peers = self.session.network.get_peers_for_service(self.msg_overlay.master_peer.mid)
