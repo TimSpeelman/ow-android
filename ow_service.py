@@ -13,6 +13,8 @@ from ipv8.configuration import get_default_configuration
 from ipv8.REST.rest_manager import RESTManager
 from ow_android.gui_endpoint import GUIEndpoint
 from ow_android.state_endpoint import StateEndpoint
+from ow_android.msg_overlay import MsgCommunity
+from ipv8.keyvault.crypto import ECCrypto
 
 try:
     from android.storage import app_storage_path    
@@ -72,6 +74,24 @@ class OpenWalletService(object):
         ]
         configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
 
+        # Add my custom overlays
+        msg_overlay_config = {
+            'class': 'MsgCommunity',
+            'key': "anonymous id",
+            'walkers': [
+                {
+                    'strategy': "RandomWalk",
+                    'peers': 20,
+                    'init': {
+                        'timeout': 3.0
+                    }
+                },
+            ],
+            'initialize': {},
+            'on_start': [('started', )]
+        }
+        configuration['overlays'].append(msg_overlay_config)
+
         # Provide the working directory to its overlays
         working_directory_overlays = ['AttestationCommunity', 'IdentityCommunity', 'TrustChainCommunity']
         for overlay in configuration['overlays']:
@@ -79,7 +99,7 @@ class OpenWalletService(object):
                 overlay['initialize'] = {'working_directory': workdir}
 
         # Start its IPv8 service
-        ipv8 = IPv8(configuration)
+        ipv8 = IPv8(configuration, extra_communities={'MsgCommunity': MsgCommunity})
         await ipv8.start()
 
         # Print the peer for reference
