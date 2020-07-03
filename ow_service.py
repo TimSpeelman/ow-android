@@ -8,7 +8,7 @@ import argparse
 from asyncio import all_tasks, ensure_future, gather, get_event_loop, sleep
 from base64 import b64encode
 
-from ipv8_service import IPv8 # FIXME
+from ipv8_service import IPv8
 from ipv8.configuration import get_default_configuration
 from ipv8.REST.rest_manager import RESTManager
 from ow_android.gui_endpoint import GUIEndpoint
@@ -18,17 +18,15 @@ from ow_android.state_endpoint import StateEndpoint
 
 class OpenWalletService(object):
 
-    default_port = 8642
-    workdir = "temp"
-
     def __init__(self):
         self._stopping = False
 
     async def start(self, args):
 
-        port = self.default_port
-        workdir = self.workdir
-        fresh = False
+        port = args.port
+        workdir = args.workdir
+        fresh = args.fresh
+        loglevel = args.loglevel
 
         # Give the peer its own working directory
         if os.path.exists(workdir):
@@ -40,7 +38,7 @@ class OpenWalletService(object):
 
         # Set up its IPv8 Configuration
         configuration = get_default_configuration()
-        configuration['logger']['level'] = "DEBUG"
+        configuration['logger']['level'] = loglevel
         configuration['keys'] = [
             {
                 'alias': "anonymous id", 
@@ -95,9 +93,10 @@ class OpenWalletService(object):
         # Start its API
         api = RESTManager(ipv8)
         endpoints = {
-                '/app': GUIEndpoint,
-                '/state': StateEndpoint
+                '/app': GUIEndpoint(),
+                '/state': StateEndpoint(workdir)
             }
+
         await api.start(port=port, endpoints=endpoints)
 
          # Handle shut down
@@ -117,16 +116,17 @@ class OpenWalletService(object):
         signal.signal(signal.SIGINT, lambda sig, _: ensure_future(signal_handler(sig)))
         signal.signal(signal.SIGTERM, lambda sig, _: ensure_future(signal_handler(sig)))
 
-
 def main(argv):
     parser = argparse.ArgumentParser(add_help=False, description=('Starts OpenWallet as a service'))
     parser.add_argument('--help', '-h', action='help', default=argparse.SUPPRESS, help='Show this help message and exit')
-    # parser.add_argument('--no-rest-api', '-a', action='store_const', default=False, const=True, help='Autonomous: disable the REST api')
+    parser.add_argument('--port', '-p', action='store', type=int, default=8642, help='Port number')
+    parser.add_argument('--workdir', '-w', action='store', default='./temp', help='The working directory')
+    parser.add_argument('--fresh', '-f', action='store_true', help='Refresh the identity')
+    parser.add_argument('--loglevel', '-l', action='store', default='ERROR', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='The log level')
     # parser.add_argument('--statistics', '-s', action='store_const', default=False, const=True, help='Enable IPv8 overlay statistics')
+    args = parser.parse_args(sys.argv[1:])
 
     service = OpenWalletService()
-
-    args = parser.parse_args(sys.argv[1:])
     loop = get_event_loop()
     coro = service.start(args)
     ensure_future(coro)

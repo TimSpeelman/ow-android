@@ -4,13 +4,6 @@ from base64 import b64encode
 import json
 import os
 
-try:
-    from android.storage import app_storage_path
-    storage_path = app_storage_path()    
-    print("Using android storage " + storage_path)
-except:
-    storage_path = os.path.join(os.getcwd(), 'temp')
-    print("Using non-android storage " + storage_path)
 
 class StateEndpoint(BaseEndpoint):
     """
@@ -19,9 +12,9 @@ class StateEndpoint(BaseEndpoint):
 
     path_to_state = ""
 
-    def __init__(self):
+    def __init__(self, storage_dir):
         super(StateEndpoint, self).__init__()
-        self.path_to_state = os.path.join(storage_path, 'state.json')
+        self.path_to_state = os.path.join(storage_dir, 'state.json')
 
     def setup_routes(self):
         self.app.add_routes([web.get('', self.handle_get),
