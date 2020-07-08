@@ -128,33 +128,10 @@ class OpenWalletService(object):
             print("OWSERVICE ANDROID PRIVATE IS NONE")
 
         priv = os.getenv("ANDROID_PRIVATE", os.getcwd())
+        guidir = os.path.join(priv, "gui")
 
-        print("OWSERVICE Files in " + priv) 
-        for root, dirs, files in os.walk(priv):
-            for filename in files:
-                print(filename)
-
-        a1 = os.path.join(priv, "src")
-        a2 = os.path.join(a1, "main")
-        a3 = os.path.join(a2, "assets")
-
-        print("OWSERVICE Files in " + a1)
-        for root, dirs, files in os.walk(a1):
-            for filename in files:
-                print(filename)
-
-        print("OWSERVICE Files in " + a2)
-        for root, dirs, files in os.walk(a2):
-            for filename in files:
-                print(filename)
-
-        print("OWSERVICE Files in " + a3)
-        for root, dirs, files in os.walk(a3):
-            for filename in files:
-                print(filename)
-
-        guidir = os.path.join(priv, "src", "main", "assets", "gui")
-
+        print("Static GUI files served from " guidir)
+        
         # Start its API
         api = RESTManager(ipv8)
         endpoints = {
