@@ -15,10 +15,10 @@ class GUIEndpoint(BaseEndpoint):
         self.files_dir = files_dir
 
     def setup_routes(self):
-        path_to_root = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
-        path_to_static = os.path.join(path_to_root, 'static')
+        # path_to_root = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
+        # path_to_static = os.path.join(path_to_root, 'static')
     
-        self.app.add_routes([web.static('/', path_to_static, show_index=True)])
+        self.app.add_routes([web.static('/', files_dir, show_index=True)])
 
     def initialize(self, session):
         super(GUIEndpoint, self).initialize(session)
