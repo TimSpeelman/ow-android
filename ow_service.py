@@ -74,7 +74,7 @@ class OpenWalletService(object):
             'IdentityCommunity', 
             'DHTDiscoveryCommunity',
             'DiscoveryCommunity',
-            'HiddenTunnelCommunity',
+            # 'HiddenTunnelCommunity',
         ]
         configuration['overlays'] = [o for o in configuration['overlays'] if o['class'] in requested_overlays]
 
