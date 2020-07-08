@@ -8,8 +8,11 @@ class GUIEndpoint(BaseEndpoint):
     This endpoint is responsible for serving the GUI.
     """
 
-    def __init__(self):
+    files_dir = ""
+
+    def __init__(self, files_dir):
         super(GUIEndpoint, self).__init__()
+        self.files_dir = files_dir
 
     def setup_routes(self):
         path_to_root = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__))))

@@ -18,6 +18,7 @@ from ow_android.msg_endpoint import MsgEndpoint
 from ow_android.attributes_endpoint import AttributesEndpoint
 from ipv8.keyvault.crypto import ECCrypto
 
+
 try:
     from android.storage import app_storage_path    
     # On android, default to the app storage
@@ -123,10 +124,38 @@ class OpenWalletService(object):
             json.dump(data, outfile)
             outfile.close()
 
+        priv = os.getenv(ANDROID_PRIVATE)
+
+        print("OWSERVICE Files in " + priv) 
+        for root, dirs, files in os.walk(priv):
+            for filename in files:
+                print(filename)
+
+        a1 = os.path.join(priv, "src")
+        a2 = os.path.join(a1, "main")
+        a3 = os.path.join(a2, "assets")
+
+        print("OWSERVICE Files in " + a1)
+        for root, dirs, files in os.walk(a1):
+            for filename in files:
+                print(filename)
+
+        print("OWSERVICE Files in " + a2)
+        for root, dirs, files in os.walk(a2):
+            for filename in files:
+                print(filename)
+
+        print("OWSERVICE Files in " + a3)
+        for root, dirs, files in os.walk(a3):
+            for filename in files:
+                print(filename)
+
+        guidir = os.path.join(priv, "src", "main", "assets", "gui")
+
         # Start its API
         api = RESTManager(ipv8)
         endpoints = {
-                '/app': GUIEndpoint(),
+                '/app': GUIEndpoint(guidir),
                 '/state': StateEndpoint(workdir),
                 '/msg': MsgEndpoint(),
                 '/attributes': AttributesEndpoint(workdir),
