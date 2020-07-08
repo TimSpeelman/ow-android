@@ -19,7 +19,8 @@ class MsgEndpoint(BaseEndpoint):
         self.app.add_routes([
                 web.get('/inbox', self.handle_get_inbox),
                 web.get('/peers', self.handle_get_peers),
-                web.get('/send', self.handle_send_message)
+                web.get('/send', self.handle_send_message),
+                web.delete('/delete', self.handle_delete_message),
                 ])    
 
     def initialize(self, session):
@@ -36,12 +37,18 @@ class MsgEndpoint(BaseEndpoint):
 
     def handle_get_inbox(self, request):
         return Response([{
-            'sender_mid_b64': b64encode(p.mid).decode('utf-8'), 
-            'message': m.decode('utf-8'),
-            'received_at': t,
-            } for (p, m, t) in self.msg_overlay.inbox])
+            'id': m['id'],
+            'sender_mid_b64': b64encode(m['peer'].mid).decode('utf-8'), 
+            'message': m['message'].decode('utf-8'),
+            'received_at': m['time'],
+            } for m in self.msg_overlay.inbox])
 
     def handle_get_peers(self, request):
         peers = self.session.network.get_peers_for_service(self.msg_overlay.master_peer.mid)
         return Response([b64encode(p.mid).decode('utf-8') for p in peers])
+
+    def handle_delete_message(self, request):
+        message_id = request.query['id']
+        success = self.msg_overlay.delete_message(message_id)
+        return Response({ "success": success })
 

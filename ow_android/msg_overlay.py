@@ -5,6 +5,7 @@ from ipv8.lazy_community import lazy_wrapper
 from ipv8.messaging.lazy_payload import VariablePayload, vp_compile
 from ipv8.peer import Peer
 from ipv8_service import IPv8
+from uuid import uuid4
 from base64 import b64encode
 import time
 
@@ -49,8 +50,18 @@ class MsgCommunity(Community):
        print("Peer %s not found, cannot send message '%s'" % (mid, message))
        return False
 
+   def delete_message(self, message_id):
+      l = len(self.inbox)
+      self.inbox = [i for i in self.inbox if i['id'] != message_id]
+      return l != len(self.inbox)
+
    @lazy_wrapper(MyMessage)
    def on_message(self, peer, payload):
       print("Got message from peer")
-      t = time.time()
-      self.inbox.append((peer, payload.message, t))
+      message = {
+         'time': time.time(),
+         'id': str(uuid4()),
+         'peer': peer,
+         'message': payload.message
+      }
+      self.inbox.append(message)
