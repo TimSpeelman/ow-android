@@ -129,8 +129,6 @@ class OpenWalletService(object):
 
         priv = os.getenv("ANDROID_PRIVATE", os.getcwd())
         guidir = os.path.join(priv, "gui")
-
-        print("Static GUI files served from " + guidir)
         
         # Start its API
         api = RESTManager(ipv8)
