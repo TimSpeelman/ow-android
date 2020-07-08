@@ -15,6 +15,7 @@ from ow_android.gui_endpoint import GUIEndpoint
 from ow_android.state_endpoint import StateEndpoint
 from ow_android.msg_overlay import MsgCommunity
 from ow_android.msg_endpoint import MsgEndpoint
+from ow_android.attributes_endpoint import AttributesEndpoint
 from ipv8.keyvault.crypto import ECCrypto
 
 try:
@@ -128,6 +129,7 @@ class OpenWalletService(object):
                 '/app': GUIEndpoint(),
                 '/state': StateEndpoint(workdir),
                 '/msg': MsgEndpoint(),
+                '/attributes': AttributesEndpoint(workdir),
             }
 
         await api.start(port=port, endpoints=endpoints)
