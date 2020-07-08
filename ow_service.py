@@ -124,7 +124,10 @@ class OpenWalletService(object):
             json.dump(data, outfile)
             outfile.close()
 
-        priv = os.getenv(ANDROID_PRIVATE)
+        if os.getenv is None:
+            print("OWSERVICE ANDROID PRIVATE IS NONE")
+
+        priv = os.getenv("ANDROID_PRIVATE", os.getcwd())
 
         print("OWSERVICE Files in " + priv) 
         for root, dirs, files in os.walk(priv):
